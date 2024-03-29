@@ -31,28 +31,91 @@
     <div id="productHistory"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+
     <script>
-        let web3;
 
-        async function connectWallet() {
-            try {
-                // Request account access if needed
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                web3 = new Web3(window.ethereum);
-                console.log("Connected to wallet:", web3.eth.defaultAccount);
-            } catch (error) {
-                console.error("Error connecting to wallet:", error);
-                alert("Failed to connect to wallet. Please make sure your wallet is unlocked and try again.");
-            }
-        }
+        // Example initialization of web3
+        var web3;
 
-        if (window.ethereum) {
-            connectWallet();
+        if (typeof window.ethereum !== 'undefined') {
+            // Modern dapp browsers
+            web3 = new Web3(window.ethereum);
+            window.ethereum.enable()
+                .then(function (accounts) {
+                    // Set default account after enabling Ethereum
+                    web3.eth.defaultAccount = accounts[0];
+                    console.log("Default account set:", web3.eth.defaultAccount);
+
+                    // Now you can access web3.eth
+                    // For example:
+                    web3.eth.getAccounts()
+                        .then(function (accounts) {
+                            console.log(accounts);
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        } else if (typeof window.web3 !== 'undefined') {
+            // Legacy dapp browsers
+            web3 = new Web3(window.web3.currentProvider);
         } else {
-            alert("Web3 not found! Please use a web3-enabled browser like MetaMask.");
+            // Non-dapp browsers
+            console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
         }
 
-        const contractAddress = '0xbC7D7244ea7AFd47C049fA459902eC002b5409FA';
+        // Accessing the 'eth' property
+        if (web3 && web3.eth) {
+            // Now you can safely access web3.eth
+            // For example:
+            web3.eth.getAccounts()
+                .then(function (accounts) {
+                    console.log(accounts);
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        } else {
+            console.error('web3 or web3.eth is undefined.');
+        }
+
+        // Function to create a product
+        async function createProduct() {
+            const productName = document.getElementById('productName').value;
+            const origin = document.getElementById('origin').value;
+
+            // Check if default account is set
+            if (!web3.eth.defaultAccount) {
+                console.error("Default account not set.");
+                return;
+            }
+
+            // Ensure default account is properly set before sending transaction
+            await web3.eth.sendTransaction({
+                from: web3.eth.defaultAccount,
+                to: contractAddress,
+                data: foodSupplyChainContract.methods.createProduct(productName, origin).encodeABI()
+            })
+                .on('transactionHash', function (hash) {
+                    console.log("Transaction Hash:", hash);
+                })
+                .on('confirmation', function (confirmationNumber, receipt) {
+                    console.log("Confirmation Number:", confirmationNumber);
+                    console.log("Receipt:", receipt);
+                })
+                .catch(function (error) {
+                    console.error("Error creating product:", error);
+                });
+
+            alert('Product created successfully!');
+        }
+
+
+
+        const contractAddress = '0x2CeBe3ddbBF851ba17bDAcf998f8F019Bf7A6e10';
         const contractABI = [
             {
                 "inputs": [
@@ -231,16 +294,21 @@
         async function getProductDetails() {
             const productId = document.getElementById('productId').value;
             const result = await foodSupplyChainContract.methods.getProductDetails(productId).call();
-            const [productName, producer, origin, timestamp] = result;
+
+            const productName = result[0];
+            const producer = result[1];
+            const origin = result[2];
+            const timestamp = result[3];
 
             const productDetailsDiv = document.getElementById('productDetails');
             productDetailsDiv.innerHTML = `
-                <p><strong>Product Name:</strong> ${productName}</p>
-                <p><strong>Producer:</strong> ${producer}</p>
-                <p><strong>Origin:</strong> ${origin}</p>
-                <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
-            `;
+            <p><strong>Product Name:</strong> ${productName}</p>
+            <p><strong>Producer:</strong> ${producer}</p>
+            <p><strong>Origin:</strong> ${origin}</p>
+            <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
+        `;
         }
+
 
         async function viewProductHistory() {
             const productId = document.getElementById('productId').value;
@@ -264,13 +332,13 @@
                     const { productId, productName, producer, origin, timestamp } = event.returnValues;
 
                     productHistoryDiv.innerHTML += `
-                        <p><strong>Product ID:</strong> ${productId}</p>
-                        <p><strong>Product Name:</strong> ${productName}</p>
-                        <p><strong>Producer:</strong> ${producer}</p>
-                        <p><strong>Origin:</strong> ${origin}</p>
-                        <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
-                        <hr>
-                    `;
+                            <p><strong>Product ID:</strong> ${productId}</p>
+                            <p><strong>Product Name:</strong> ${productName}</p>
+                            <p><strong>Producer:</strong> ${producer}</p>
+                            <p><strong>Origin:</strong> ${origin}</p>
+                            <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
+                            <hr>
+                        `;
                 });
             } catch (error) {
                 console.error('Error fetching product history:', error);
