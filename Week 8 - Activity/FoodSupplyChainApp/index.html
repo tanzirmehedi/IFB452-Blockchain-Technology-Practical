@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Supply Chain</title>
+</head>
+<body>
+    <h1>Food Supply Chain</h1>
+
+    <label for="productName">Product Name:</label>
+    <input type="text" id="productName" placeholder="Enter product name">
+
+    <label for="origin">Origin:</label>
+    <input type="text" id="origin" placeholder="Enter origin">
+
+    <button onclick="createProduct()">Create Product</button>
+
+    <hr>
+
+    <label for="productId">Product ID:</label>
+    <input type="number" id="productId" placeholder="Enter product ID">
+
+    <button onclick="getProductDetails()">Get Product Details</button>
+
+    <hr>
+
+    <button onclick="viewProductHistory()">View Product History</button>
+
+    <div id="productDetails"></div>
+    <div id="productHistory"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+
+    <script>
+
+        // Example initialization of web3
+        var web3;
+
+        if (typeof window.ethereum !== 'undefined') {
+            // Modern dapp browsers
+            web3 = new Web3(window.ethereum);
+            window.ethereum.enable()
+                .then(function (accounts) {
+                    // Set default account after enabling Ethereum
+                    web3.eth.defaultAccount = accounts[0];
+                    console.log("Default account set:", web3.eth.defaultAccount);
+
+                    // Now you can access web3.eth
+                    // For example:
+                    web3.eth.getAccounts()
+                        .then(function (accounts) {
+                            console.log(accounts);
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        } else if (typeof window.web3 !== 'undefined') {
+            // Legacy dapp browsers
+            web3 = new Web3(window.web3.currentProvider);
+        } else {
+            // Non-dapp browsers
+            console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+        }
+
+        // Accessing the 'eth' property
+        if (web3 && web3.eth) {
+            // Now you can safely access web3.eth
+            // For example:
+            web3.eth.getAccounts()
+                .then(function (accounts) {
+                    console.log(accounts);
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        } else {
+            console.error('web3 or web3.eth is undefined.');
+        }
+
+        // Function to create a product
+        async function createProduct() {
+            const productName = document.getElementById('productName').value;
+            const origin = document.getElementById('origin').value;
+
+            // Check if default account is set
+            if (!web3.eth.defaultAccount) {
+                console.error("Default account not set.");
+                return;
+            }
+
+            // Ensure default account is properly set before sending transaction
+            await web3.eth.sendTransaction({
+                from: web3.eth.defaultAccount,
+                to: contractAddress,
+                data: foodSupplyChainContract.methods.createProduct(productName, origin).encodeABI()
+            })
+                .on('transactionHash', function (hash) {
+                    console.log("Transaction Hash:", hash);
+                })
+                .on('confirmation', function (confirmationNumber, receipt) {
+                    console.log("Confirmation Number:", confirmationNumber);
+                    console.log("Receipt:", receipt);
+                })
+                .catch(function (error) {
+                    console.error("Error creating product:", error);
+                });
+
+            alert('Product created successfully!');
+        }
+
+
+
+        const contractAddress = '0x2CeBe3ddbBF851ba17bDAcf998f8F019Bf7A6e10';
+        const contractABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_productName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "_origin",
+                        "type": "string"
+                    }
+                ],
+                "name": "createProduct",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "productId",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "productName",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "address",
+                        "name": "producer",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "origin",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "ProductCreated",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_productId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "getProductDetails",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "productCount",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "products",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "productName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "producer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "origin",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        const foodSupplyChainContract = new web3.eth.Contract(contractABI, contractAddress);
+
+        async function createProduct() {
+            const productName = document.getElementById('productName').value;
+            const origin = document.getElementById('origin').value;
+
+            await foodSupplyChainContract.methods.createProduct(productName, origin).send({ from: web3.eth.defaultAccount })
+                .on('transactionHash', function (hash) {
+                    console.log("Transaction Hash:", hash);
+                })
+                .on('confirmation', function (confirmationNumber, receipt) {
+                    console.log("Confirmation Number:", confirmationNumber);
+                    console.log("Receipt:", receipt);
+                });
+
+            alert('Product created successfully!');
+        }
+
+        async function getProductDetails() {
+            const productId = document.getElementById('productId').value;
+            const result = await foodSupplyChainContract.methods.getProductDetails(productId).call();
+
+            const productName = result[0];
+            const producer = result[1];
+            const origin = result[2];
+            const timestamp = result[3];
+
+            const productDetailsDiv = document.getElementById('productDetails');
+            productDetailsDiv.innerHTML = `
+            <p><strong>Product Name:</strong> ${productName}</p>
+            <p><strong>Producer:</strong> ${producer}</p>
+            <p><strong>Origin:</strong> ${origin}</p>
+            <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
+        `;
+        }
+
+
+        async function viewProductHistory() {
+            const productId = document.getElementById('productId').value;
+            const productHistoryDiv = document.getElementById('productHistory');
+
+            try {
+                const productHistory = await foodSupplyChainContract.getPastEvents('ProductCreated', {
+                    filter: { productId },
+                    fromBlock: 0,
+                    toBlock: 'latest'
+                });
+
+                productHistoryDiv.innerHTML = "<h3>Product History</h3>";
+
+                if (productHistory.length === 0) {
+                    productHistoryDiv.innerHTML += "<p>No history available for this product.</p>";
+                    return;
+                }
+
+                productHistory.forEach(event => {
+                    const { productId, productName, producer, origin, timestamp } = event.returnValues;
+
+                    productHistoryDiv.innerHTML += `
+                            <p><strong>Product ID:</strong> ${productId}</p>
+                            <p><strong>Product Name:</strong> ${productName}</p>
+                            <p><strong>Producer:</strong> ${producer}</p>
+                            <p><strong>Origin:</strong> ${origin}</p>
+                            <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
+                            <hr>
+                        `;
+                });
+            } catch (error) {
+                console.error('Error fetching product history:', error);
+                productHistoryDiv.innerHTML = "<p>Error fetching product history. Please try again.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
