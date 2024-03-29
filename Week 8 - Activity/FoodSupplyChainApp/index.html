@@ -52,7 +52,7 @@
             alert("Web3 not found! Please use a web3-enabled browser like MetaMask.");
         }
 
-        const contractAddress = '0xbC7D7244ea7AFd47C049fA459902eC002b5409FA';
+        const contractAddress = '0xd86d62c708db2304B8e47ca87387542427501bA7';
         const contractABI = [
             {
                 "inputs": [
@@ -210,7 +210,7 @@
             }
         ];
 
-        const foodSupplyChainContract = new web3.eth.Contract(contractABI, contractAddress);
+        //const foodSupplyChainContract = new web3.eth.Contract(contractABI, contractAddress);
 
         async function createProduct() {
             const productName = document.getElementById('productName').value;
@@ -235,11 +235,11 @@
 
             const productDetailsDiv = document.getElementById('productDetails');
             productDetailsDiv.innerHTML = `
-                <p><strong>Product Name:</strong> ${productName}</p>
-                <p><strong>Producer:</strong> ${producer}</p>
-                <p><strong>Origin:</strong> ${origin}</p>
-                <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
-            `;
+                    <p><strong>Product Name:</strong> ${productName}</p>
+                    <p><strong>Producer:</strong> ${producer}</p>
+                    <p><strong>Origin:</strong> ${origin}</p>
+                    <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
+                `;
         }
 
         async function viewProductHistory() {
@@ -264,13 +264,13 @@
                     const { productId, productName, producer, origin, timestamp } = event.returnValues;
 
                     productHistoryDiv.innerHTML += `
-                        <p><strong>Product ID:</strong> ${productId}</p>
-                        <p><strong>Product Name:</strong> ${productName}</p>
-                        <p><strong>Producer:</strong> ${producer}</p>
-                        <p><strong>Origin:</strong> ${origin}</p>
-                        <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
-                        <hr>
-                    `;
+                            <p><strong>Product ID:</strong> ${productId}</p>
+                            <p><strong>Product Name:</strong> ${productName}</p>
+                            <p><strong>Producer:</strong> ${producer}</p>
+                            <p><strong>Origin:</strong> ${origin}</p>
+                            <p><strong>Timestamp:</strong> ${new Date(timestamp * 1000)}</p>
+                            <hr>
+                        `;
                 });
             } catch (error) {
                 console.error('Error fetching product history:', error);
