@@ -1,0 +1,13 @@
+Operation	                Minimum Gas
+
+Basic ETH transfer	        ~21,000
+Calling a contract function	30,000 – 100,000+
+Contract deployment	        200,000+
+
+
+
+Operation	                Gas Cost
+
+0 → non-zero storage write	~20,000 gas
+non-zero → non-zero update	~5,000 gas
+Read storage (SLOAD)	        ~2100 gas
