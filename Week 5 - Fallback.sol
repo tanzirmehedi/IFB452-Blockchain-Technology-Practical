@@ -23,12 +23,27 @@ contract Fallback {
 }
 
 contract SendToFallback {
-    function transferToFallback(address payable _to) public payable {
-        _to.transfer(msg.value);
+    // Allow direct ETH transfers to this contract
+    receive() external payable {}
+
+    // Deposit ETH into this contract
+    function deposit() public payable {}
+
+    // Check this contract's balance
+    function getBalance() public view returns (uint) {
+        return address(this).balance;
     }
 
-    function callFallback(address payable _to) public payable {
-        (bool sent, ) = _to.call{value: msg.value}("");
+    // Transfer ETH from this contract's own balance using transfer()
+    function transferToFallback(address payable _to, uint _amount) public {
+        require(address(this).balance >= _amount, "Insufficient contract balance");
+        _to.transfer(_amount);
+    }
+
+    // Transfer ETH from this contract's own balance using call()
+    function callFallback(address payable _to, uint _amount) public {
+        require(address(this).balance >= _amount, "Insufficient contract balance");
+        (bool sent, ) = _to.call{value: _amount}("");
         require(sent, "Failed to send Ether");
     }
 }
