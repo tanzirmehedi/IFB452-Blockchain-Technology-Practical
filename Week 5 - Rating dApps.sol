@@ -1,4 +1,5 @@
-pragma solidity ^0.5;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
 contract Rating {
     
@@ -6,7 +7,7 @@ contract Rating {
     string[] users;
     mapping(string => User_Details) rating;
     
-    constructor() public{
+    constructor(){
         owner = msg.sender;    
     }
     
